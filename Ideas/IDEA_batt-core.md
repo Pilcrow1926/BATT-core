@@ -35,17 +35,24 @@ batt-core를 다른 모든 batt-* 모드가 의존하는 공통 기반 모드로
 - **레포/모듈 구조: 완전히 분리된 레포 + jar 의존성** — 사용자 승인 완료. batt-core를 포함한 9개 레포(`batt-core`, `batt-claims`, `batt-economy`, `batt-farming`, `batt-rpg`, `batt-auth`, `batt-events`, `batt-store`, `batt-server`)는 각각 독립 레포로 유지되며, 다른 batt-* 모드는 batt-core를 빌드된 jar 의존성(예: JitPack/GitHub Packages 등 — 구체적 배포 방식은 미정, 사용자 승인 필요)으로 참조
 - **API 버전 관리: 시맨틱 버저닝(SemVer)** — 사용자 승인 완료. batt-core는 SemVer(예: 1.2.3)를 적용하고, 각 batt-* 모드는 build.gradle에서 의존하는 batt-core 버전을 명시적으로 고정
 
+추가로 다음 3개 항목이 사용자 승인을 통해 확정되었다 (승인일 2026-08-17, 2차 승인):
+
+- **로컬 개발/테스트 환경 DB: Docker Compose로 로컬 MySQL 컨테이너 실행** — 사용자 승인 완료. 레포에 `docker-compose.yml`을 포함해 누구나 동일한 로컬 MySQL 환경을 바로 띄울 수 있게 함. 파일 구체 내용(포트, 볼륨, 초기 스키마 등)은 미정 — 실제 구현 단계에서 별도 승인 필요
+- **정적 API 클래스(`BattCoreAPI` 등)의 1차 기능 범위: DB 액세스, 이벤트 발행/구독 헬퍼, 플레이어 공통 데이터 조회** — 사용자 승인 완료. 권한 체크 API(LuckPerms 래핑)는 1차 범위 후보로 제시되었으나 이번 승인에서 선택되지 않음 — 권한 체크 API 포함 여부는 미정, 사용자 승인 필요
+- **batt-core jar 배포 방식: GitHub Packages** — 사용자 승인 완료. 다른 batt-* 모드는 GitHub Packages의 Maven 레지스트리를 통해 batt-core를 의존성으로 참조. GitHub 인증 토큰을 CI/로컬 빌드에서 어떻게 다룰지는 미정 — 사용자 승인 필요
+
 아직 남은 미정 항목 (아래 "미해결 규칙과 승인 질문" 참고):
 
-- 로컬 개발/테스트 환경에서 MySQL을 어떻게 띄울지: **아직 미정** — 사용자가 명시적으로 보류함 (2026-08-17). Docker Compose 등 구체적 방법은 추후 결정
-- API 인터페이스의 구체적 형태(인터페이스 목록, 메서드 시그니처): 미정 — 사용자 승인 필요
-- batt-core jar 배포/퍼블리시 방식(JitPack, GitHub Packages, 로컬 Maven 등): 미정 — 사용자 승인 필요
+- API 인터페이스의 구체적 형태(인터페이스 목록, 메서드 시그니처): 미정 — 사용자 승인 필요 (1차 기능 범위만 승인됨: DB 액세스/이벤트 헬퍼/플레이어 공통 데이터 조회)
+- 정적 API 클래스에 권한 체크(LuckPerms 래핑) 기능을 포함할지: 미정 — 사용자 승인 필요
+- Docker Compose 로컬 MySQL 설정 세부값(포트, 볼륨, 초기 스키마 등): 미정 — 사용자 승인 필요
+- GitHub Packages 인증 토큰을 CI/로컬 빌드에서 어떻게 관리할지: 미정 — 사용자 승인 필요
 
 ## 영향을 받는 경로와 시스템
 
 - 문서 경로: `Ideas/IDEA_batt-core.md` (이 문서). 향후 각 batt-* 모드별 제안 문서는 `Ideas/IDEA_batt-<모드명>.md` 형태로 이어질 예정 — 명명 규칙은 이 대화에서의 관례이며 별도 확정 문서는 없음
 - 코드 경로 또는 시스템: 미정 — 사용자 승인 필요. 마인크래프트 모드 프로젝트이므로 이 저장소(BATT-core)에는 Gradle 기반 NeoForge 모드 프로젝트 구조(`src/main/java`, `src/main/resources`, `build.gradle`, `gradle.properties` 등)가 들어설 것으로 예상되나, 실제 코드 스캐폴딩은 이 제안이 `Approved-for-spec`이 되기 전까지 만들지 않음
-- 예상되는 데이터/인터페이스 영향: batt-claims, batt-economy, batt-farming, batt-rpg, batt-auth, batt-events, batt-store 전부가 batt-core의 MySQL 연동 계층, NeoForge 이벤트 버스 위에 정의된 커스텀 이벤트, 정적 API 클래스(`BattCoreAPI` 등), LuckPerms 기반 권한 체크에 의존하게 될 것으로 예상됨. 각 모드는 batt-core를 jar 의존성으로 참조(Gradle 멀티모듈 아님)
+- 예상되는 데이터/인터페이스 영향: batt-claims, batt-economy, batt-farming, batt-rpg, batt-auth, batt-events, batt-store 전부가 batt-core의 MySQL 연동 계층, NeoForge 이벤트 버스 위에 정의된 커스텀 이벤트, 정적 API 클래스(`BattCoreAPI` 등: DB 액세스, 이벤트 발행/구독 헬퍼, 플레이어 공통 데이터 조회)에 의존하게 될 것으로 예상됨. 각 모드는 batt-core를 GitHub Packages를 통한 jar 의존성으로 참조(Gradle 멀티모듈 아님). 로컬 개발 시에는 레포에 포함될 Docker Compose로 MySQL을 띄움. 권한 체크(LuckPerms 래핑)를 정적 API에 포함할지는 미정
 - 변경하지 않는 경로: 미정 — 사용자 승인 필요
 
 ## 공개·비공개 정보 영향
@@ -59,22 +66,23 @@ batt-core를 다른 모든 batt-* 모드가 의존하는 공통 기반 모드로
 ## 미해결 규칙과 승인 질문
 
 - ~~DB 종류~~ — **해결됨: MySQL** (2026-08-17 승인)
-- 로컬 개발/테스트 환경에서 DB를 어떻게 띄울지 — **미정, 사용자가 명시적으로 보류함** (2026-08-17)
+- ~~로컬 개발/테스트 환경에서 DB를 어떻게 띄울지~~ — **해결됨: Docker Compose로 로컬 MySQL 컨테이너** (2026-08-17 2차 승인). 세부 설정값(포트, 볼륨, 초기 스키마 등)은 미정 — 사용자 승인 필요
 - ~~이벤트 버스를 NeoForge 표준 이벤트 시스템 위에 얹을지, 완전히 별도로 만들지~~ — **해결됨: NeoForge 표준 이벤트 버스 활용** (2026-08-17 승인)
 - ~~모드 간 API 버전 관리 방식~~ — **해결됨: 시맨틱 버저닝(SemVer)** (2026-08-17 승인)
-- API 인터페이스의 구체적 형태(인터페이스 목록, 메서드 시그니처) — 미정, 사용자 승인 필요 (정적 API 클래스라는 큰 방향만 승인됨)
+- API 인터페이스의 구체적 형태(인터페이스 목록, 메서드 시그니처) — 미정, 사용자 승인 필요. 1차 기능 범위는 승인됨: DB 액세스, 이벤트 발행/구독 헬퍼, 플레이어 공통 데이터 조회 (2026-08-17 2차 승인)
+- 정적 API 클래스에 권한 체크(LuckPerms 래핑) 기능을 포함할지 — 미정, 사용자 승인 필요 (1차 범위 후보로 제시됐으나 이번 승인에서 선택되지 않음)
 - ~~권한 시스템이 batt-core 소속인지 batt-claims 소속인지~~ — **해결됨: batt-core** (2026-08-17 승인)
 - ~~LuckPerms 같은 외부 권한 모드와 연동할지, 자체 구현할지~~ — **해결됨: LuckPerms 연동** (2026-08-17 승인)
 - ~~마인크래프트/NeoForge 대상 버전~~ — **해결됨: NeoForge 26.1.2** (2026-08-17 승인)
 - ~~Gradle 멀티 모듈 구조로 갈지, 완전히 분리된 레포+jar 의존성으로 갈지~~ — **해결됨: 완전히 분리된 레포 + jar 의존성** (2026-08-17 승인)
-- batt-core jar를 어떻게 배포/퍼블리시할지(JitPack, GitHub Packages, 로컬 Maven 등) — 미정, 사용자 승인 필요
+- ~~batt-core jar를 어떻게 배포/퍼블리시할지~~ — **해결됨: GitHub Packages** (2026-08-17 2차 승인). 인증 토큰을 CI/로컬 빌드에서 어떻게 관리할지는 미정 — 사용자 승인 필요
 - ~~이 IDEA_TEMPLATE.md가 원래 어떤 프로젝트를 위한 템플릿인지~~ — **해결됨: 마인크래프트 모드 프로젝트이며, 보드/카드 게임 전용 섹션(좌석 개념 등)은 N/A로 처리** (2026-08-17 승인)
 
 ## 출처와 근거
 
 - 출처: 사용자와의 대화 (2026-08-17 ~ 2026-08-18), IDEA_TEMPLATE.md 업로드 파일, 2026-08-17 세션에서의 `AskUserQuestion` 승인 응답
-- 확인한 사실: 서버 이름은 BATT로 확정됨. batt-core를 포함한 9개 레포 이름(`batt-core`, `batt-claims`, `batt-economy`, `batt-farming`, `batt-rpg`, `batt-auth`, `batt-events`, `batt-store`, `batt-server`)이 대화 중 제안됨. batt-core는 마인크래프트 NeoForge 모드이며 DB=MySQL, 이벤트 버스=NeoForge 표준, API=정적 API 클래스, 권한=batt-core 소속+LuckPerms 연동, 대상 버전=NeoForge 26.1.2, 레포 구조=분리된 레포+jar 의존성, API 버전관리=SemVer로 사용자가 확정함
-- 아직 확인하지 않은 주장/가정: batt-core의 정확한 API 인터페이스 목록/시그니처, jar 배포 방식, 로컬 개발용 MySQL 실행 방법
+- 확인한 사실: 서버 이름은 BATT로 확정됨. batt-core를 포함한 9개 레포 이름(`batt-core`, `batt-claims`, `batt-economy`, `batt-farming`, `batt-rpg`, `batt-auth`, `batt-events`, `batt-store`, `batt-server`)이 대화 중 제안됨. batt-core는 마인크래프트 NeoForge 모드이며 DB=MySQL, 이벤트 버스=NeoForge 표준, API=정적 API 클래스(1차 범위: DB 액세스/이벤트 헬퍼/플레이어 공통 데이터 조회), 권한=batt-core 소속+LuckPerms 연동, 대상 버전=NeoForge 26.1.2, 레포 구조=분리된 레포+jar 의존성, API 버전관리=SemVer, 로컬 개발 DB=Docker Compose, jar 배포=GitHub Packages로 사용자가 확정함
+- 아직 확인하지 않은 주장/가정: batt-core의 정확한 API 인터페이스 목록/메서드 시그니처, 정적 API에 권한 체크 포함 여부, Docker Compose 세부 설정값, GitHub Packages 인증 토큰 관리 방식
 - 재현 또는 검증 방법: 미정 — 사용자 승인 필요
 
 비밀, 자격 증명, 개인 식별 정보, 내부 키를 붙여 넣지 않습니다. 근거가 없으면 `근거 없음`이라고 명시합니다.
@@ -91,6 +99,7 @@ batt-core를 다른 모든 batt-* 모드가 의존하는 공통 기반 모드로
 | --- | --- | --- | --- |
 | 2026-08-17 | `Draft` | 미정 | 작성 시작. 위 "미해결 규칙과 승인 질문" 항목 전부 승인 대기 중 |
 | 2026-08-17 | `Draft` (유지) | Pilcrow1926 | 사용자 승인으로 다음 8개 항목 확정: DB=MySQL, 이벤트 버스=NeoForge 표준, API 형태=정적 API 클래스, 권한 소속=batt-core, LuckPerms 연동, 대상 버전=NeoForge 26.1.2, 레포 구조=분리+jar 의존성, API 버전관리=SemVer, 제안자/승인 담당자=Pilcrow1926. 로컬 개발 DB 실행 방식은 사용자가 명시적으로 보류(아직 미정). API 인터페이스 세부 시그니처와 jar 배포 방식은 미확정으로 남아 있어 상태는 `Draft` 유지 |
+| 2026-08-17 | `Draft` (유지) | Pilcrow1926 | 2차 승인으로 다음 3개 항목 확정: 로컬 개발 DB=Docker Compose 로컬 MySQL 컨테이너, 정적 API 1차 기능 범위=DB 액세스+이벤트 발행/구독 헬퍼+플레이어 공통 데이터 조회, jar 배포 방식=GitHub Packages. 권한 체크(LuckPerms 래핑)를 정적 API에 포함할지, API 메서드 시그니처 세부 설계, Docker Compose 세부 설정값, GitHub Packages 인증 토큰 관리 방식은 여전히 미정으로 남아 있어 상태는 `Draft` 유지 |
 
 `Approved-for-spec`이 되기 전에는 `Docs/GAME_LOOP_SPEC.md` 또는 코드를 변경하지 않습니다. 승인 후에도 먼저 명세에 승인된 사실을 기록하고, 구현·검증 변경을 별도로 추적합니다.
 
